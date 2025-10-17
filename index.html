@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>🐬 돌고래 호이짜 게임 🌊</title>
+  <title>🐬 돌고래 점프 게임 🌊</title>
   <style>
     body {
       margin: 0;
@@ -18,27 +18,26 @@
       overflow: hidden;
     }
 
-    /* 바다 배경 */
+    /* 파도 */
     #wave {
       position: absolute;
       bottom: 0;
       width: 100%;
       height: 120px;
       background: linear-gradient(#00bcd4, #0288d1);
-      border-top-left-radius: 50% 20px;
-      border-top-right-radius: 50% 20px;
-      animation: waveMove 5s linear infinite;
+      animation: waveMove 6s linear infinite;
+      opacity: 0.9;
     }
 
     @keyframes waveMove {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50px); }
+      0% { background-position-x: 0; }
+      100% { background-position-x: 100px; }
     }
 
-    /* 돌고래 몸 */
+    /* 돌고래 캐릭터 */
     .dolphin {
       position: absolute;
-      bottom: 100px;
+      bottom: 120px;
       left: 100px;
       width: 120px;
       height: 80px;
@@ -54,7 +53,6 @@
       100% { transform: rotate(-3deg) translateY(-4px); }
     }
 
-    /* 배 부분 */
     .belly {
       position: absolute;
       bottom: 10px;
@@ -65,7 +63,6 @@
       border-radius: 50%;
     }
 
-    /* 눈 */
     .eye {
       position: absolute;
       top: 20px;
@@ -76,7 +73,6 @@
       border-radius: 50%;
     }
 
-    /* 볼 */
     .cheek {
       position: absolute;
       top: 35px;
@@ -88,7 +84,6 @@
       opacity: 0.8;
     }
 
-    /* 지느러미 */
     .fin {
       position: absolute;
       top: 40px;
@@ -100,7 +95,6 @@
       transform: rotate(-30deg);
     }
 
-    /* 꼬리 */
     .tail {
       position: absolute;
       bottom: 10px;
@@ -110,6 +104,16 @@
       background: #58b0dc;
       border-radius: 50% 0 50% 0;
       transform: rotate(-40deg);
+    }
+
+    /* 발판 */
+    .platform {
+      position: absolute;
+      width: 150px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.5);
     }
 
     #message {
@@ -146,7 +150,13 @@
 
     <div id="message">🐬 호이짜~!</div>
 
-    <!-- 바다소리 배경음 -->
+    <!-- 발판들 -->
+    <div class="platform" style="left:100px; bottom:120px;"></div>
+    <div class="platform" style="left:350px; bottom:220px;"></div>
+    <div class="platform" style="left:600px; bottom:320px;"></div>
+    <div class="platform" style="left:300px; bottom:450px;"></div>
+
+    <!-- 바다소리 -->
     <audio id="bgm" loop>
       <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b25d8d45b0.mp3?filename=ocean-waves-110734.mp3" type="audio/mp3">
     </audio>
@@ -162,19 +172,22 @@
     const message = document.getElementById("message");
     const jumpSound = document.getElementById("jumpSound");
     const bgm = document.getElementById("bgm");
+    const platforms = document.querySelectorAll(".platform");
 
     let x = 100;
     let y = 0;
+    let vy = 0;
+    let gravity = -1.5;
     let jumping = false;
-    let gravity = 0;
-    const ground = 100;
+    const dolphinWidth = 120;
+    const dolphinHeight = 80;
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") x += 15;
       if (e.key === "ArrowLeft") x -= 15;
       if (e.key === "ArrowUp" && !jumping) {
         jumping = true;
-        gravity = 15;
+        vy = 20; // 점프 높이 증가
         jumpSound.currentTime = 0;
         jumpSound.play();
       }
@@ -195,28 +208,49 @@
     }
 
     function update() {
-      if (jumping) {
-        y += gravity;
-        gravity -= 1.2;
-        if (y <= 0) {
-          y = 0;
+      vy += gravity;
+      y += vy;
+
+      // 바닥
+      if (y < 0) {
+        y = 0;
+        vy = 0;
+        jumping = false;
+      }
+
+      // 발판 충돌 판정
+      platforms.forEach(p => {
+        const px = p.offsetLeft;
+        const py = p.offsetTop;
+        const pw = p.offsetWidth;
+        const ph = p.offsetHeight;
+        const dolphinX = x;
+        const dolphinY = window.innerHeight - (y + 120); // 위치 계산
+
+        if (
+          dolphinX + dolphinWidth > px &&
+          dolphinX < px + pw &&
+          dolphinY + dolphinHeight > py &&
+          dolphinY + dolphinHeight < py + ph + 20 &&
+          vy < 0
+        ) {
+          y = window.innerHeight - py - 120;
+          vy = 0;
           jumping = false;
         }
-      }
+      });
 
+      // 화면 밖으로 이동 방지
       if (x < 0) x = 0;
-      if (x > window.innerWidth - 100) {
-        x = window.innerWidth - 100;
-      }
+      if (x > window.innerWidth - dolphinWidth) x = window.innerWidth - dolphinWidth;
 
       dolphin.style.left = x + "px";
-      dolphin.style.bottom = ground + y + "px";
+      dolphin.style.bottom = 120 + y + "px";
       requestAnimationFrame(update);
     }
 
     update();
 
-    // 바다소리 재생
     document.body.addEventListener("click", () => {
       bgm.play();
     }, { once: true });

@@ -24,7 +24,6 @@ body {
   border-radius: 20px;
   bottom: 50px;
   left: 100px;
-  transition: bottom 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -75,12 +74,12 @@ let bearX = 100;
 let bearY = 50; // bottom 기준
 const bearWidth = 80;
 const bearHeight = 80;
-let vy = 0;
-const gravity = -2;
 let jumping = false;
+let jumpTarget = 0;
+let jumpSpeed = 8;
 let level = 0;
-
 const platforms = [];
+const blockHeight = 100; // 한 칸 점프 높이
 
 // 블록 생성
 function createPlatform(x, y){
@@ -93,53 +92,46 @@ function createPlatform(x, y){
 }
 
 // 초기 블록
-for(let i=0;i<10;i++){
-  const px = Math.random()*(window.innerWidth-120);
-  const py = 50 + i*100;
-  createPlatform(px, py);
-}
+createPlatform(100, 50);
+createPlatform(300, 150);
+createPlatform(500, 250);
+createPlatform(200, 350);
+createPlatform(400, 450);
 
 // 키 입력
 document.addEventListener("keydown", e=>{
-  if(e.key==="ArrowRight") bearX += 20;
-  if(e.key==="ArrowLeft") bearX -= 20;
-  if(e.key==="ArrowUp" && !jumping){
-    vy = 25; // 한 칸 점프 높이
-    jumping = true;
+  if(e.key === "ArrowRight") bearX += 20;
+  if(e.key === "ArrowLeft") bearX -= 20;
+  if(e.key === "ArrowUp" && !jumping){
+    // 가장 가까운 블록 위로 점프
+    const possibleBlocks = platforms.filter(p=>{
+      const px = p.offsetLeft;
+      const pw = p.offsetWidth;
+      return bearX + bearWidth > px && bearX < px + pw;
+    }).map(p=>p.offsetTop).filter(py=>py > bearY).sort((a,b)=>a-b);
+    if(possibleBlocks.length > 0){
+      jumpTarget = possibleBlocks[0];
+      jumping = true;
+    }
   }
 });
 
 // 업데이트 루프
 function update(){
-  vy += gravity;
-  bearY += vy;
-
-  // 바닥
-  if(bearY < 0){
-    bearY = 0;
-    vy = 0;
-    jumping = false;
-  }
-
-  // 플랫폼 충돌
-  platforms.forEach(p=>{
-    const px = p.offsetLeft;
-    const py = p.offsetTop;
-    const pw = p.offsetWidth;
-    const ph = p.offsetHeight;
-    const bearTop = bearY + bearHeight;
-    if(bearX + bearWidth > px && bearX < px + pw && bearTop >= py && bearTop - vy < py && vy < 0){
-      bearY = py - bearHeight;
-      vy = 0;
+  if(jumping){
+    if(bearY < jumpTarget){
+      bearY += jumpSpeed;
+      if(bearY > jumpTarget) bearY = jumpTarget;
+    } else {
       jumping = false;
       level += 1;
       levelEl.textContent = "레벨: " + level;
     }
-  });
+  }
 
   // 화면 밖 방지
   if(bearX<0) bearX=0;
-  if(bearX>window.innerWidth-bearWidth) bearX = window.innerWidth-bearWidth;
+  if(bearX>window.innerWidth-bearWidth) bearX=window.innerWidth-bearWidth;
 
   // 화면 스크롤
   if(bearY > window.innerHeight/2){

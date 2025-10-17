@@ -2,34 +2,29 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>🐻 곰돌이 레벨업 게임</title>
+<title>Mini Mario</title>
 <style>
 body {
   margin: 0;
   overflow: hidden;
-  background: linear-gradient(#ffe4b5, #ffb347);
-  font-family: "Comic Sans MS", sans-serif;
+  background: #5c94fc;
+  font-family: sans-serif;
 }
 #gameArea {
   position: relative;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  background: #5c94fc;
 }
-.bear {
+.mario {
   position: absolute;
-  width: 80px;
-  height: 80px;
-  background: brown;
-  border-radius: 20px;
+  width: 50px;
+  height: 50px;
+  background: red;
   bottom: 50px;
-  left: 100px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-weight: bold;
-  font-size: 24px;
+  left: 50px;
+  border-radius: 5px;
 }
 .platform {
   position: absolute;
@@ -38,12 +33,19 @@ body {
   background: #8B4513;
   border-radius: 5px;
 }
-#level {
+.coin {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: gold;
+  border-radius: 50%;
+}
+#score {
   position: absolute;
   top: 10px;
   left: 10px;
   font-size: 24px;
-  font-weight: bold;
+  color: white;
 }
 #gameOver {
   position: absolute;
@@ -53,116 +55,133 @@ body {
   font-size: 48px;
   color: red;
   display: none;
-  font-weight: bold;
 }
 </style>
 </head>
 <body>
 <div id="gameArea">
-  <div class="bear" id="bear">🐻</div>
-  <div id="level">레벨: 0</div>
+  <div class="mario" id="mario"></div>
+  <div id="score">코인: 0</div>
   <div id="gameOver">게임 오버!</div>
 </div>
 
 <script>
-const bear = document.getElementById("bear");
+const mario = document.getElementById("mario");
 const gameArea = document.getElementById("gameArea");
-const levelEl = document.getElementById("level");
+const scoreEl = document.getElementById("score");
 const gameOverEl = document.getElementById("gameOver");
 
-let bearX = 100;
-let bearY = 50;
-const bearWidth = 80;
-const bearHeight = 80;
+let x = 50;
+let y = 50;
+let vy = 0;
+const gravity = -1.2;
 let jumping = false;
-let jumpTarget = 0;
-let jumpSpeed = 8;
-let level = 0;
-const platforms = [];
-const blockHeight = 100;
+let score = 0;
 
-// 발판 수 줄이기: 랜덤 위치에 배치
-const totalBlocks = 20; // 발판 수
-for(let i = 0; i < totalBlocks; i++){
+const marioWidth = 50;
+const marioHeight = 50;
+
+const platforms = [];
+const coins = [];
+
+// 기본 발판
+function createPlatform(x, y){
   const p = document.createElement("div");
   p.classList.add("platform");
-  const x = Math.random() * (window.innerWidth - 120);
-  const y = 50 + i * blockHeight + Math.random() * 50; // 간격 약간 랜덤
   p.style.left = x + "px";
   p.style.bottom = y + "px";
   gameArea.appendChild(p);
   platforms.push(p);
 }
 
-// 키 입력
-document.addEventListener("keydown", e=>{
-  if(e.key === "ArrowRight") bearX += 20;
-  if(e.key === "ArrowLeft") bearX -= 20;
-  if(e.key === "ArrowUp" && !jumping){
-    // 곰돌이 위로 올라갈 수 있는 블록 찾기
-    const possibleBlocks = platforms.filter(p=>{
-      const px = p.offsetLeft;
-      const pw = p.offsetWidth;
-      return bearX + bearWidth > px && bearX < px + pw;
-    }).map(p=>p.offsetTop).filter(py=>py > bearY).sort((a,b)=>a-b);
+// 기본 코인
+function createCoin(x, y){
+  const c = document.createElement("div");
+  c.classList.add("coin");
+  c.style.left = x + "px";
+  c.style.bottom = y + "px";
+  gameArea.appendChild(c);
+  coins.push(c);
+}
 
-    if(possibleBlocks.length > 0){
-      jumpTarget = possibleBlocks[0];
-      jumping = true;
-    }
-  }
+// 레벨 구성
+createPlatform(0, 0);
+createPlatform(150, 100);
+createPlatform(300, 200);
+createPlatform(450, 300);
+createPlatform(600, 400);
+
+createCoin(180, 130);
+createCoin(330, 230);
+createCoin(480, 330);
+
+// 키 입력
+const keys = {};
+document.addEventListener("keydown", e=>{
+  keys[e.key] = true;
+});
+document.addEventListener("keyup", e=>{
+  keys[e.key] = false;
 });
 
-// 업데이트 루프
 function update(){
-  if(jumping){
-    if(bearY < jumpTarget){
-      bearY += jumpSpeed;
-      if(bearY > jumpTarget) bearY = jumpTarget;
-    } else {
-      jumping = false;
-      level += 1;
-      levelEl.textContent = "레벨: " + level;
-    }
-  } else {
-    // 블록 위에 서 있는지 확인
-    let onBlock = false;
-    platforms.forEach(p=>{
-      const px = p.offsetLeft;
-      const pw = p.offsetWidth;
-      const py = p.offsetTop;
-      if(bearX + bearWidth > px && bearX < px + pw && bearY === py - bearHeight){
-        onBlock = true;
-      }
-    });
-    if(!onBlock){
-      // 블록 위가 아니면 낙하
-      bearY -= jumpSpeed;
-    }
+  // 좌우 이동
+  if(keys["ArrowRight"] || keys["d"]) x += 5;
+  if(keys["ArrowLeft"] || keys["a"]) x -= 5;
+
+  // 점프
+  if((keys["ArrowUp"] || keys["w"] || keys[" "]) && !jumping){
+    vy = 20;
+    jumping = true;
   }
+
+  // 중력
+  vy += gravity;
+  y += vy;
+
+  // 발판 충돌
+  let onPlatform = false;
+  platforms.forEach(p=>{
+    const px = p.offsetLeft;
+    const pw = p.offsetWidth;
+    const py = p.offsetTop;
+    const ph = p.offsetHeight;
+
+    if(x + marioWidth > px && x < px + pw &&
+       y <= py + ph && y + marioHeight >= py &&
+       vy <= 0){
+      y = py + ph;
+      vy = 0;
+      jumping = false;
+      onPlatform = true;
+    }
+  });
+
+  // 코인 수집
+  coins.forEach((c,i)=>{
+    const cx = c.offsetLeft;
+    const cy = c.offsetTop;
+    if(x + marioWidth > cx && x < cx + 20 &&
+       y + marioHeight > cy && y < cy + 20){
+      score += 1;
+      scoreEl.textContent = "코인: " + score;
+      c.remove();
+      coins.splice(i,1);
+    }
+  });
 
   // 화면 밖 방지
-  if(bearX<0) bearX=0;
-  if(bearX>window.innerWidth-bearWidth) bearX = window.innerWidth-bearWidth;
+  if(x < 0) x = 0;
+  if(x > window.innerWidth - marioWidth) x = window.innerWidth - marioWidth;
 
-  // 화면 스크롤
-  if(bearY > window.innerHeight/2){
-    const delta = bearY - window.innerHeight/2;
-    bearY = window.innerHeight/2;
-    platforms.forEach(p=>{
-      const b = parseFloat(p.style.bottom);
-      p.style.bottom = (b - delta) + "px";
-    });
-  }
-
-  // 게임 오버 체크: 블록 위에 안착 못하고 바닥으로 떨어지면 종료
-  if(bearY <= 0){
+  // 게임 오버
+  if(y < 0){
     gameOverEl.style.display = "block";
     return;
   }
 
-  bear.style.left = bearX + "px";
-  bear.style.bottom = bearY + "px";
+  mario.style.left = x + "px";
+  mario.style.bottom = y + "px";
 
   requestAnimationFrame(update);
 }

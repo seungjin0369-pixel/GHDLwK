@@ -5,58 +5,92 @@
   <title>도티 호이짜 게임</title>
   <style>
     body {
-      background-color: #fff8e1;
-      text-align: center;
+      margin: 0;
+      overflow: hidden;
+      background-color: #b3e5fc;
       font-family: "Comic Sans MS", sans-serif;
-      margin-top: 50px;
     }
-    h1 {
-      color: #ff6600;
-      font-size: 40px;
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(#87ceeb, #fff);
+      overflow: hidden;
     }
     #doti {
-      width: 180px;
-      cursor: pointer;
+      position: absolute;
+      bottom: 50px;
+      left: 100px;
+      width: 120px;
       transition: transform 0.1s;
     }
-    #doti:active {
-      transform: scale(1.2);
-    }
-    #score {
-      font-size: 24px;
-      margin-top: 20px;
-      color: #333;
-    }
     #message {
-      font-size: 28px;
-      color: #ff4500;
-      margin-top: 15px;
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 40px;
+      color: #ff5722;
       font-weight: bold;
       display: none;
     }
   </style>
 </head>
 <body>
-  <h1>🎮 도티 호이짜 게임 🎮</h1>
-  <p>도티를 클릭하면 “호이짜!”</p>
-  <img id="doti" src="https://i.imgur.com/zJ4QhRp.png" alt="도티" onclick="addScore()">
-  <p id="score">점수: 0</p>
-  <div id="message">호이짜!!</div>
+  <div id="gameArea">
+    <img id="doti" src="https://i.imgur.com/zJ4QhRp.png" alt="도티">
+    <div id="message">호이짜!!!</div>
+  </div>
 
   <script>
-    let score = 0;
-    const scoreText = document.getElementById("score");
+    const doti = document.getElementById("doti");
     const message = document.getElementById("message");
+    const gameArea = document.getElementById("gameArea");
 
-    function addScore() {
-      score++;
-      scoreText.textContent = "점수: " + score;
+    let x = 100;
+    let y = 0;
+    let jumping = false;
+    let gravity = 0;
+    const ground = 50; // 땅 높이
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") x += 20;
+      if (e.key === "ArrowLeft") x -= 20;
+      if (e.key === "ArrowUp" && !jumping) {
+        jumping = true;
+        gravity = 15;
+      }
+      if (e.key === " ") sayHoiJja();
+    });
+
+    function sayHoiJja() {
       message.style.display = "block";
-
+      doti.style.transform = "scale(1.2)";
       setTimeout(() => {
         message.style.display = "none";
+        doti.style.transform = "scale(1)";
       }, 500);
     }
+
+    function update() {
+      // 중력 효과
+      if (jumping) {
+        y += gravity;
+        gravity -= 1.2;
+        if (y <= 0) {
+          y = 0;
+          jumping = false;
+        }
+      }
+
+      // 도티 화면 이동 반영
+      doti.style.left = x + "px";
+      doti.style.bottom = ground + y + "px";
+
+      requestAnimationFrame(update);
+    }
+
+    update();
   </script>
 </body>
 </html>

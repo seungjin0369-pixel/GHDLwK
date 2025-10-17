@@ -5,41 +5,58 @@
   <title>도티 호이짜 게임</title>
   <style>
     body {
-      background-color: #f0f8ff;
+      background-color: #fff8e1;
       text-align: center;
-      font-family: 'Arial', sans-serif;
+      font-family: "Comic Sans MS", sans-serif;
+      margin-top: 50px;
     }
     h1 {
       color: #ff6600;
+      font-size: 40px;
     }
     #doti {
-      width: 150px;
+      width: 180px;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.1s;
     }
     #doti:active {
-      transform: scale(1.1);
+      transform: scale(1.2);
     }
     #score {
       font-size: 24px;
+      margin-top: 20px;
       color: #333;
+    }
+    #message {
+      font-size: 28px;
+      color: #ff4500;
+      margin-top: 15px;
+      font-weight: bold;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1>도티 호이짜 게임 🎮</h1>
-  <p>도티를 클릭해서 "호이짜!"를 외쳐보세요!</p>
+  <h1>🎮 도티 호이짜 게임 🎮</h1>
+  <p>도티를 클릭하면 “호이짜!”</p>
   <img id="doti" src="https://i.imgur.com/zJ4QhRp.png" alt="도티" onclick="addScore()">
   <p id="score">점수: 0</p>
+  <div id="message">호이짜!!</div>
 
   <script>
     let score = 0;
+    const scoreText = document.getElementById("score");
+    const message = document.getElementById("message");
+
     function addScore() {
       score++;
-      document.getElementById("score").textContent = "점수: " + score;
-      alert("호이짜!");
+      scoreText.textContent = "점수: " + score;
+      message.style.display = "block";
+
+      setTimeout(() => {
+        message.style.display = "none";
+      }, 500);
     }
   </script>
 </body>
 </html>
-

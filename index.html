@@ -71,7 +71,7 @@ const levelEl = document.getElementById("level");
 const gameOverEl = document.getElementById("gameOver");
 
 let bearX = 100;
-let bearY = 50; // bottom 기준
+let bearY = 50;
 const bearWidth = 80;
 const bearHeight = 80;
 let jumping = false;
@@ -79,30 +79,27 @@ let jumpTarget = 0;
 let jumpSpeed = 8;
 let level = 0;
 const platforms = [];
+const blockHeight = 100;
 
-// 블록 생성
-function createPlatform(x, y){
+// 발판 수 줄이기: 랜덤 위치에 배치
+const totalBlocks = 20; // 발판 수
+for(let i = 0; i < totalBlocks; i++){
   const p = document.createElement("div");
   p.classList.add("platform");
+  const x = Math.random() * (window.innerWidth - 120);
+  const y = 50 + i * blockHeight + Math.random() * 50; // 간격 약간 랜덤
   p.style.left = x + "px";
   p.style.bottom = y + "px";
   gameArea.appendChild(p);
   platforms.push(p);
 }
 
-// 초기 블록
-createPlatform(100, 50);
-createPlatform(300, 150);
-createPlatform(500, 250);
-createPlatform(200, 350);
-createPlatform(400, 450);
-
 // 키 입력
 document.addEventListener("keydown", e=>{
   if(e.key === "ArrowRight") bearX += 20;
   if(e.key === "ArrowLeft") bearX -= 20;
   if(e.key === "ArrowUp" && !jumping){
-    // 점프할 블록 찾기
+    // 곰돌이 위로 올라갈 수 있는 블록 찾기
     const possibleBlocks = platforms.filter(p=>{
       const px = p.offsetLeft;
       const pw = p.offsetWidth;
@@ -128,17 +125,18 @@ function update(){
       levelEl.textContent = "레벨: " + level;
     }
   } else {
-    // 자유낙하
-    let standing = false;
+    // 블록 위에 서 있는지 확인
+    let onBlock = false;
     platforms.forEach(p=>{
       const px = p.offsetLeft;
       const pw = p.offsetWidth;
       const py = p.offsetTop;
       if(bearX + bearWidth > px && bearX < px + pw && bearY === py - bearHeight){
-        standing = true;
+        onBlock = true;
       }
     });
-    if(!standing && bearY > 0){
+    if(!onBlock){
+      // 블록 위가 아니면 낙하
       bearY -= jumpSpeed;
     }
   }
@@ -154,14 +152,10 @@ function update(){
     platforms.forEach(p=>{
       const b = parseFloat(p.style.bottom);
       p.style.bottom = (b - delta) + "px";
-      if(parseFloat(p.style.bottom) < -50){
-        p.style.bottom = window.innerHeight + Math.random()*100 + 50 + "px";
-        p.style.left = Math.random()*(window.innerWidth-120) + "px";
-      }
     });
   }
 
-  // 게임 오버 체크
+  // 게임 오버 체크: 블록 위에 안착 못하고 바닥으로 떨어지면 종료
   if(bearY <= 0){
     gameOverEl.style.display = "block";
     return;

@@ -18,7 +18,6 @@
       overflow: hidden;
     }
 
-    /* 파도 */
     #wave {
       position: absolute;
       bottom: 0;
@@ -34,7 +33,6 @@
       100% { background-position-x: 100px; }
     }
 
-    /* 돌고래 캐릭터 */
     .dolphin {
       position: absolute;
       bottom: 120px;
@@ -53,68 +51,13 @@
       100% { transform: rotate(-3deg) translateY(-4px); }
     }
 
-    .belly {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      width: 100px;
-      height: 40px;
-      background: #e0f7fa;
-      border-radius: 50%;
-    }
+    .belly { position: absolute; bottom: 10px; left: 10px; width: 100px; height: 40px; background: #e0f7fa; border-radius: 50%; }
+    .eye { position: absolute; top: 20px; left: 75px; width: 14px; height: 14px; background: black; border-radius: 50%; }
+    .cheek { position: absolute; top: 35px; left: 60px; width: 10px; height: 10px; background: pink; border-radius: 50%; opacity: 0.8; }
+    .fin { position: absolute; top: 40px; left: 20px; width: 25px; height: 15px; background: #58b0dc; border-radius: 20px 20px 0 0; transform: rotate(-30deg); }
+    .tail { position: absolute; bottom: 10px; left: -15px; width: 30px; height: 30px; background: #58b0dc; border-radius: 50% 0 50% 0; transform: rotate(-40deg); }
 
-    .eye {
-      position: absolute;
-      top: 20px;
-      left: 75px;
-      width: 14px;
-      height: 14px;
-      background: black;
-      border-radius: 50%;
-    }
-
-    .cheek {
-      position: absolute;
-      top: 35px;
-      left: 60px;
-      width: 10px;
-      height: 10px;
-      background: pink;
-      border-radius: 50%;
-      opacity: 0.8;
-    }
-
-    .fin {
-      position: absolute;
-      top: 40px;
-      left: 20px;
-      width: 25px;
-      height: 15px;
-      background: #58b0dc;
-      border-radius: 20px 20px 0 0;
-      transform: rotate(-30deg);
-    }
-
-    .tail {
-      position: absolute;
-      bottom: 10px;
-      left: -15px;
-      width: 30px;
-      height: 30px;
-      background: #58b0dc;
-      border-radius: 50% 0 50% 0;
-      transform: rotate(-40deg);
-    }
-
-    /* 발판 */
-    .platform {
-      position: absolute;
-      width: 150px;
-      height: 20px;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 10px;
-      border: 2px solid rgba(255,255,255,0.5);
-    }
+    .platform { position: absolute; width: 150px; height: 20px; background: rgba(255, 255, 255, 0.7); border-radius: 10px; border: 2px solid rgba(255,255,255,0.5); }
 
     #message {
       position: absolute;
@@ -150,18 +93,15 @@
 
     <div id="message">🐬 호이짜~!</div>
 
-    <!-- 발판들 -->
     <div class="platform" style="left:100px; bottom:120px;"></div>
     <div class="platform" style="left:350px; bottom:220px;"></div>
     <div class="platform" style="left:600px; bottom:320px;"></div>
     <div class="platform" style="left:300px; bottom:450px;"></div>
 
-    <!-- 바다소리 -->
     <audio id="bgm" loop>
       <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b25d8d45b0.mp3?filename=ocean-waves-110734.mp3" type="audio/mp3">
     </audio>
 
-    <!-- 돌고래 점프 소리 -->
     <audio id="jumpSound">
       <source src="https://cdn.pixabay.com/download/audio/2021/09/07/audio_15b16b4b25.mp3?filename=dolphin-sound-5774.mp3" type="audio/mp3">
     </audio>
@@ -187,7 +127,7 @@
       if (e.key === "ArrowLeft") x -= 15;
       if (e.key === "ArrowUp" && !jumping) {
         jumping = true;
-        vy = 20; // 점프 높이 증가
+        vy = 20;
         jumpSound.currentTime = 0;
         jumpSound.play();
       }
@@ -211,7 +151,7 @@
       vy += gravity;
       y += vy;
 
-      // 바닥
+      // 바닥 충돌
       if (y < 0) {
         y = 0;
         vy = 0;
@@ -224,23 +164,24 @@
         const py = p.offsetTop;
         const pw = p.offsetWidth;
         const ph = p.offsetHeight;
-        const dolphinX = x;
-        const dolphinY = window.innerHeight - (y + 120); // 위치 계산
+
+        // 돌고래의 현재 위치 (바닥 기준)
+        const dolphinBottom = y + 120; 
 
         if (
-          dolphinX + dolphinWidth > px &&
-          dolphinX < px + pw &&
-          dolphinY + dolphinHeight > py &&
-          dolphinY + dolphinHeight < py + ph + 20 &&
+          x + dolphinWidth > px &&
+          x < px + pw &&
+          dolphinBottom > py &&
+          dolphinBottom - vy <= py && // 위로 올라갈 때는 무시
           vy < 0
         ) {
-          y = window.innerHeight - py - 120;
+          y = py - 120;
           vy = 0;
           jumping = false;
         }
       });
 
-      // 화면 밖으로 이동 방지
+      // 화면 밖 이동 방지
       if (x < 0) x = 0;
       if (x > window.innerWidth - dolphinWidth) x = window.innerWidth - dolphinWidth;
 

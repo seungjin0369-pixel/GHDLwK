@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>도티 호이짜 게임 🧡</title>
+  <title>🐬 돌고래 호이짜 게임 🌊</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: linear-gradient(#aee1f9, #f9f9f9);
-      font-family: "Comic Sans MS", "Arial Rounded MT Bold", sans-serif;
+      background: linear-gradient(#4fc3f7, #e0f7fa);
+      font-family: "Comic Sans MS", sans-serif;
     }
 
     #gameArea {
@@ -16,24 +16,25 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+      background: url('https://i.imgur.com/bZgF4ue.jpg') center/cover no-repeat;
     }
 
-    #ground {
+    #water {
       position: absolute;
       bottom: 0;
       width: 100%;
-      height: 80px;
-      background-color: #ffdf8c;
-      border-top: 4px solid #e5b04f;
+      height: 100px;
+      background: rgba(0, 100, 255, 0.3);
+      backdrop-filter: blur(3px);
     }
 
-    #doti {
+    #dolphin {
       position: absolute;
-      bottom: 80px;
+      bottom: 100px;
       left: 100px;
-      width: 120px;
+      width: 160px;
       transition: transform 0.15s ease;
-      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.2));
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
     }
 
     #message {
@@ -41,9 +42,9 @@
       top: 40px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 36px;
+      font-size: 40px;
+      color: #00bcd4;
       font-weight: bold;
-      color: #ff6f61;
       text-shadow: 2px 2px #fff;
       display: none;
       animation: pop 0.5s ease;
@@ -51,34 +52,48 @@
 
     @keyframes pop {
       0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
-      50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+      50% { transform: translateX(-50%) scale(1.3); opacity: 1; }
       100% { transform: translateX(-50%) scale(1); opacity: 0; }
     }
   </style>
 </head>
 <body>
   <div id="gameArea">
-    <div id="ground"></div>
-    <img id="doti" src="https://i.imgur.com/5j0bZ5W.png" alt="귀여운 도티">
-    <div id="message">호이짜💥!</div>
+    <div id="water"></div>
+    <img id="dolphin" src="https://i.imgur.com/XbGVjKk.png" alt="귀여운 돌고래">
+    <div id="message">🐬 호이짜~!</div>
+
+    <!-- 🔊 배경음악 (바다소리) -->
+    <audio id="bgm" loop autoplay>
+      <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b25d8d45b0.mp3?filename=ocean-waves-110734.mp3" type="audio/mp3">
+    </audio>
+
+    <!-- 🔊 점프 사운드 (돌고래 소리) -->
+    <audio id="jumpSound">
+      <source src="https://cdn.pixabay.com/download/audio/2021/09/07/audio_15b16b4b25.mp3?filename=dolphin-sound-5774.mp3" type="audio/mp3">
+    </audio>
   </div>
 
   <script>
-    const doti = document.getElementById("doti");
+    const dolphin = document.getElementById("dolphin");
     const message = document.getElementById("message");
+    const jumpSound = document.getElementById("jumpSound");
+    const bgm = document.getElementById("bgm");
 
     let x = 100;
     let y = 0;
     let jumping = false;
     let gravity = 0;
-    const ground = 80;
+    const ground = 100;
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") x += 15;
       if (e.key === "ArrowLeft") x -= 15;
       if (e.key === "ArrowUp" && !jumping) {
         jumping = true;
-        gravity = 14;
+        gravity = 15;
+        jumpSound.currentTime = 0;
+        jumpSound.play();
       }
       if (e.key === " ") sayHoiJja();
     });
@@ -86,20 +101,20 @@
     function sayHoiJja() {
       message.style.display = "block";
       message.style.animation = "none";
-      void message.offsetWidth; // reset animation
+      void message.offsetWidth; // 애니메이션 초기화
       message.style.animation = "pop 0.5s ease";
 
-      doti.style.transform = "scale(1.2)";
+      dolphin.style.transform = "scale(1.2)";
       setTimeout(() => {
         message.style.display = "none";
-        doti.style.transform = "scale(1)";
+        dolphin.style.transform = "scale(1)";
       }, 500);
     }
 
     function update() {
       if (jumping) {
         y += gravity;
-        gravity -= 1.1;
+        gravity -= 1.2;
         if (y <= 0) {
           y = 0;
           jumping = false;
@@ -107,14 +122,19 @@
       }
 
       if (x < 0) x = 0;
-      if (x > window.innerWidth - 120) x = window.innerWidth - 120;
+      if (x > window.innerWidth - 160) x = window.innerWidth - 160;
 
-      doti.style.left = x + "px";
-      doti.style.bottom = ground + y + "px";
+      dolphin.style.left = x + "px";
+      dolphin.style.bottom = ground + y + "px";
       requestAnimationFrame(update);
     }
 
     update();
+
+    // 모바일에서도 자동 재생을 위해 클릭 시 활성화
+    document.body.addEventListener("click", () => {
+      bgm.play();
+    }, { once: true });
   </script>
 </body>
 </html>

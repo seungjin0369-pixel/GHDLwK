@@ -2,69 +2,93 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>도티 호이짜 게임</title>
+  <title>도티 호이짜 게임 🧡</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background-color: #b3e5fc;
-      font-family: "Comic Sans MS", sans-serif;
+      background: linear-gradient(#aee1f9, #f9f9f9);
+      font-family: "Comic Sans MS", "Arial Rounded MT Bold", sans-serif;
     }
+
     #gameArea {
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(#87ceeb, #fff);
       overflow: hidden;
     }
+
+    #ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 80px;
+      background-color: #ffdf8c;
+      border-top: 4px solid #e5b04f;
+    }
+
     #doti {
       position: absolute;
-      bottom: 50px;
+      bottom: 80px;
       left: 100px;
       width: 120px;
-      transition: transform 0.1s;
+      transition: transform 0.15s ease;
+      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.2));
     }
+
     #message {
       position: absolute;
-      top: 50px;
+      top: 40px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 40px;
-      color: #ff5722;
+      font-size: 36px;
       font-weight: bold;
+      color: #ff6f61;
+      text-shadow: 2px 2px #fff;
       display: none;
+      animation: pop 0.5s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
+      50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+      100% { transform: translateX(-50%) scale(1); opacity: 0; }
     }
   </style>
 </head>
 <body>
   <div id="gameArea">
-    <img id="doti" src="https://i.imgur.com/zJ4QhRp.png" alt="도티">
-    <div id="message">호이짜!!!</div>
+    <div id="ground"></div>
+    <img id="doti" src="https://i.imgur.com/5j0bZ5W.png" alt="귀여운 도티">
+    <div id="message">호이짜💥!</div>
   </div>
 
   <script>
     const doti = document.getElementById("doti");
     const message = document.getElementById("message");
-    const gameArea = document.getElementById("gameArea");
 
     let x = 100;
     let y = 0;
     let jumping = false;
     let gravity = 0;
-    const ground = 50; // 땅 높이
+    const ground = 80;
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") x += 20;
-      if (e.key === "ArrowLeft") x -= 20;
+      if (e.key === "ArrowRight") x += 15;
+      if (e.key === "ArrowLeft") x -= 15;
       if (e.key === "ArrowUp" && !jumping) {
         jumping = true;
-        gravity = 15;
+        gravity = 14;
       }
       if (e.key === " ") sayHoiJja();
     });
 
     function sayHoiJja() {
       message.style.display = "block";
+      message.style.animation = "none";
+      void message.offsetWidth; // reset animation
+      message.style.animation = "pop 0.5s ease";
+
       doti.style.transform = "scale(1.2)";
       setTimeout(() => {
         message.style.display = "none";
@@ -73,20 +97,20 @@
     }
 
     function update() {
-      // 중력 효과
       if (jumping) {
         y += gravity;
-        gravity -= 1.2;
+        gravity -= 1.1;
         if (y <= 0) {
           y = 0;
           jumping = false;
         }
       }
 
-      // 도티 화면 이동 반영
+      if (x < 0) x = 0;
+      if (x > window.innerWidth - 120) x = window.innerWidth - 120;
+
       doti.style.left = x + "px";
       doti.style.bottom = ground + y + "px";
-
       requestAnimationFrame(update);
     }
 

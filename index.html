@@ -79,7 +79,6 @@ let jumpTarget = 0;
 let jumpSpeed = 8;
 let level = 0;
 const platforms = [];
-const blockHeight = 100; // 한 칸 점프 높이
 
 // 블록 생성
 function createPlatform(x, y){
@@ -103,12 +102,13 @@ document.addEventListener("keydown", e=>{
   if(e.key === "ArrowRight") bearX += 20;
   if(e.key === "ArrowLeft") bearX -= 20;
   if(e.key === "ArrowUp" && !jumping){
-    // 가장 가까운 블록 위로 점프
+    // 점프할 블록 찾기
     const possibleBlocks = platforms.filter(p=>{
       const px = p.offsetLeft;
       const pw = p.offsetWidth;
       return bearX + bearWidth > px && bearX < px + pw;
     }).map(p=>p.offsetTop).filter(py=>py > bearY).sort((a,b)=>a-b);
+
     if(possibleBlocks.length > 0){
       jumpTarget = possibleBlocks[0];
       jumping = true;
@@ -127,11 +127,25 @@ function update(){
       level += 1;
       levelEl.textContent = "레벨: " + level;
     }
+  } else {
+    // 자유낙하
+    let standing = false;
+    platforms.forEach(p=>{
+      const px = p.offsetLeft;
+      const pw = p.offsetWidth;
+      const py = p.offsetTop;
+      if(bearX + bearWidth > px && bearX < px + pw && bearY === py - bearHeight){
+        standing = true;
+      }
+    });
+    if(!standing && bearY > 0){
+      bearY -= jumpSpeed;
+    }
   }
 
   // 화면 밖 방지
   if(bearX<0) bearX=0;
-  if(bearX>window.innerWidth-bearWidth) bearX=window.innerWidth-bearWidth;
+  if(bearX>window.innerWidth-bearWidth) bearX = window.innerWidth-bearWidth;
 
   // 화면 스크롤
   if(bearY > window.innerHeight/2){
@@ -147,8 +161,8 @@ function update(){
     });
   }
 
-  // 게임 오버
-  if(bearY + bearHeight < 0){
+  // 게임 오버 체크
+  if(bearY <= 0){
     gameOverEl.style.display = "block";
     return;
   }

@@ -7,34 +7,40 @@
     body {
       margin: 0;
       overflow: hidden;
-      background: linear-gradient(#4fc3f7, #e0f7fa);
-      font-family: "Comic Sans MS", sans-serif;
+      background-color: #aee1f9;
+      font-family: "Comic Sans MS", "Arial Rounded MT Bold", sans-serif;
     }
 
     #gameArea {
       position: relative;
       width: 100vw;
       height: 100vh;
+      background: url('https://i.imgur.com/J1bE3N2.jpg') center/cover no-repeat; /* 바다 배경 */
       overflow: hidden;
-      background: url('https://i.imgur.com/bZgF4ue.jpg') center/cover no-repeat;
-    }
-
-    #water {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 100px;
-      background: rgba(0, 100, 255, 0.3);
-      backdrop-filter: blur(3px);
     }
 
     #dolphin {
       position: absolute;
       bottom: 100px;
       left: 100px;
-      width: 160px;
+      width: 180px;
       transition: transform 0.15s ease;
       filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    }
+
+    #wave {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 120px;
+      background: url('https://i.imgur.com/qALs5bJ.png') repeat-x;
+      animation: waveMove 10s linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes waveMove {
+      from { background-position-x: 0; }
+      to { background-position-x: 1000px; }
     }
 
     #message {
@@ -43,8 +49,8 @@
       left: 50%;
       transform: translateX(-50%);
       font-size: 40px;
-      color: #00bcd4;
       font-weight: bold;
+      color: #00bcd4;
       text-shadow: 2px 2px #fff;
       display: none;
       animation: pop 0.5s ease;
@@ -59,16 +65,16 @@
 </head>
 <body>
   <div id="gameArea">
-    <div id="water"></div>
-    <img id="dolphin" src="https://i.imgur.com/XbGVjKk.png" alt="귀여운 돌고래">
+    <div id="wave"></div>
+    <img id="dolphin" src="https://i.imgur.com/ntxlfGm.png" alt="귀여운 돌고래">
     <div id="message">🐬 호이짜~!</div>
 
-    <!-- 🔊 배경음악 (바다소리) -->
+    <!-- 🌊 배경음악: 파도소리 -->
     <audio id="bgm" loop autoplay>
       <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b25d8d45b0.mp3?filename=ocean-waves-110734.mp3" type="audio/mp3">
     </audio>
 
-    <!-- 🔊 점프 사운드 (돌고래 소리) -->
+    <!-- 🐬 점프 사운드: 돌고래 소리 -->
     <audio id="jumpSound">
       <source src="https://cdn.pixabay.com/download/audio/2021/09/07/audio_15b16b4b25.mp3?filename=dolphin-sound-5774.mp3" type="audio/mp3">
     </audio>
@@ -122,7 +128,7 @@
       }
 
       if (x < 0) x = 0;
-      if (x > window.innerWidth - 160) x = window.innerWidth - 160;
+      if (x > window.innerWidth - 180) x = window.innerWidth - 180;
 
       dolphin.style.left = x + "px";
       dolphin.style.bottom = ground + y + "px";
@@ -131,7 +137,7 @@
 
     update();
 
-    // 모바일에서도 자동 재생을 위해 클릭 시 활성화
+    // 모바일 브라우저용 — 클릭 시 배경음악 활성화
     document.body.addEventListener("click", () => {
       bgm.play();
     }, { once: true });

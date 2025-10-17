@@ -1,1 +1,45 @@
-호이짜!
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>도티 호이짜 게임</title>
+  <style>
+    body {
+      background-color: #f0f8ff;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+    }
+    h1 {
+      color: #ff6600;
+    }
+    #doti {
+      width: 150px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    #doti:active {
+      transform: scale(1.1);
+    }
+    #score {
+      font-size: 24px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>도티 호이짜 게임 🎮</h1>
+  <p>도티를 클릭해서 "호이짜!"를 외쳐보세요!</p>
+  <img id="doti" src="https://i.imgur.com/zJ4QhRp.png" alt="도티" onclick="addScore()">
+  <p id="score">점수: 0</p>
+
+  <script>
+    let score = 0;
+    function addScore() {
+      score++;
+      document.getElementById("score").textContent = "점수: " + score;
+      alert("호이짜!");
+    }
+  </script>
+</body>
+</html>
+

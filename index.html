@@ -8,14 +8,14 @@
       margin: 0;
       overflow: hidden;
       background-color: #aee1f9;
-      font-family: "Comic Sans MS", "Arial Rounded MT Bold", sans-serif;
+      font-family: "Comic Sans MS", sans-serif;
     }
 
     #gameArea {
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: url('https://i.imgur.com/J1bE3N2.jpg') center/cover no-repeat; /* 바다 배경 */
+      background: url('https://i.imgur.com/J1bE3N2.jpg') center/cover no-repeat; /* 바다 배경 이미지 */
       overflow: hidden;
     }
 
@@ -23,7 +23,7 @@
       position: absolute;
       bottom: 100px;
       left: 100px;
-      width: 180px;
+      width: 100px;  /* 사이즈 조정 가능 */
       transition: transform 0.15s ease;
       filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
     }
@@ -48,7 +48,7 @@
       top: 40px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 40px;
+      font-size: 36px;
       font-weight: bold;
       color: #00bcd4;
       text-shadow: 2px 2px #fff;
@@ -66,15 +66,17 @@
 <body>
   <div id="gameArea">
     <div id="wave"></div>
-    <img id="dolphin" src="https://i.imgur.com/ntxlfGm.png" alt="귀여운 돌고래">
+    <img id="dolphin"
+         src="https://i.imgur.com/ntxlfGm.png"
+         alt="귀여운 돌고래">  <!-- 예시 이미지 링크 -->
     <div id="message">🐬 호이짜~!</div>
 
-    <!-- 🌊 배경음악: 파도소리 -->
-    <audio id="bgm" loop autoplay>
+    <!-- 배경음악: 바다소리 -->
+    <audio id="bgm" loop>
       <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b25d8d45b0.mp3?filename=ocean-waves-110734.mp3" type="audio/mp3">
     </audio>
 
-    <!-- 🐬 점프 사운드: 돌고래 소리 -->
+    <!-- 점프 사운드: 돌고래 소리 -->
     <audio id="jumpSound">
       <source src="https://cdn.pixabay.com/download/audio/2021/09/07/audio_15b16b4b25.mp3?filename=dolphin-sound-5774.mp3" type="audio/mp3">
     </audio>
@@ -107,7 +109,7 @@
     function sayHoiJja() {
       message.style.display = "block";
       message.style.animation = "none";
-      void message.offsetWidth; // 애니메이션 초기화
+      void message.offsetWidth;
       message.style.animation = "pop 0.5s ease";
 
       dolphin.style.transform = "scale(1.2)";
@@ -128,7 +130,9 @@
       }
 
       if (x < 0) x = 0;
-      if (x > window.innerWidth - 180) x = window.innerWidth - 180;
+      if (x > window.innerWidth - dolphin.clientWidth) {
+        x = window.innerWidth - dolphin.clientWidth;
+      }
 
       dolphin.style.left = x + "px";
       dolphin.style.bottom = ground + y + "px";
@@ -137,7 +141,6 @@
 
     update();
 
-    // 모바일 브라우저용 — 클릭 시 배경음악 활성화
     document.body.addEventListener("click", () => {
       bgm.play();
     }, { once: true });
